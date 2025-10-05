@@ -27,3 +27,6 @@ dist/
 # NEVER commit files containing passwords, API keys, or other secrets.
 *.env
 .env
+
+# Processed data artifacts
+data/processed/
