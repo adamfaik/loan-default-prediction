@@ -30,3 +30,6 @@ dist/
 
 # Processed data artifacts
 data/processed/
+
+# MLflow tracking artifacts
+mlruns/
