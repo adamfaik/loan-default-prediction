@@ -1,41 +1,60 @@
-    name: Build and Push to AWS ECR
+name: Build, Test, and Deploy to AWS ECR
 
-    # This workflow runs on every push to the 'main' branch
-    on:
-      push:
-        branches: [ "main" ]
+on:
+  push:
+    branches: [ "main" ]
 
-    env:
-      # --- EDIT THESE TWO VARIABLES ---
-      AWS_REGION: us-east-1
-      ECR_REPOSITORY: loan-default-app
-      # --------------------------------
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: loan-default-app
 
-    jobs:
-      build-and-push:
-        name: Build and Push Docker Image
-        runs-on: ubuntu-latest # Use a standard Linux runner
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
 
-        steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v2
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: ${{ env.AWS_REGION }}
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
-        - name: Log in to Amazon ECR
-          id: login-ecr
-          uses: aws-actions/amazon-ecr-login@v1
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
 
-        - name: Build, tag, and push image to Amazon ECR
-          id: build-image
-          env:
-            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-            IMAGE_TAG: ${{ github.sha }} # Use the commit hash as the image tag for uniqueness
-          run: |
-            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    - name: Run data processing script
+      run: |
+        python src/data_processing.py
+
+    - name: Run training script to generate model
+      run: |
+        # We need to manually create the models folder and copy the best model
+        mkdir -p models
+        python src/train.py
+        # Find the best model from the mlruns directory and copy it
+        # This is a simplified way; a real-world script might be more robust
+        cp $(find mlruns -name "model.pkl" | head -n 1) models/model.pkl
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
