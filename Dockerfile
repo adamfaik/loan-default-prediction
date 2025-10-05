@@ -20,7 +20,7 @@ COPY . .
 
 # 6. Expose the port the app runs on
 # This tells Docker that the container listens on port 5000.
-EXPOSE 5000
+EXPOSE 5001
 
 # 7. Define the command to run when the container starts
 # This is the command that launches our Flask application.
