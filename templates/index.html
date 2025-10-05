@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Default Prediction</title>
+    <!-- Include Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-lg bg-white p-8 rounded-xl shadow-lg">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Loan Default Prediction</h1>
+            <p class="text-gray-500 mt-2">Enter the applicant's financial details to assess their default risk.</p>
+        </div>
+
+        <!-- Prediction Form -->
+        <form action="/predict" method="post" class="space-y-6">
+            
+            <!-- Grid for form inputs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="fico_score" class="block text-sm font-medium text-gray-700">FICO Score</label>
+                    <input type="number" id="fico_score" name="fico_score" value="650" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                
+                <div>
+                    <label for="income" class="block text-sm font-medium text-gray-700">Annual Income ($)</label>
+                    <input type="number" id="income" name="income" value="70000" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="loan_amt_outstanding" class="block text-sm font-medium text-gray-700">Loan Amount ($)</label>
+                    <input type="number" step="0.01" id="loan_amt_outstanding" name="loan_amt_outstanding" value="4000" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="total_debt_outstanding" class="block text-sm font-medium text-gray-700">Total Debt ($)</label>
+                    <input type="number" step="0.01" id="total_debt_outstanding" name="total_debt_outstanding" value="8000" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                
+                <div>
+                    <label for="years_employed" class="block text-sm font-medium text-gray-700">Years Employed</label>
+                    <input type="number" id="years_employed" name="years_employed" value="5" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="credit_lines_outstanding" class="block text-sm font-medium text-gray-700">Credit Lines</label>
+                    <input type="number" id="credit_lines_outstanding" name="credit_lines_outstanding" value="1" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Assess Risk
+                </button>
+            </div>
+        </form>
+
+        <!-- Prediction Result Section -->
+        {% if prediction_text %}
+        <div id="result" class="mt-8 text-center p-4 rounded-md 
+            {% if 'Will Not Default' in prediction_text %} 
+                bg-green-100 text-green-800 
+            {% else %} 
+                bg-red-100 text-red-800 
+            {% endif %}">
+            <h2 class="text-lg font-semibold">{{ prediction_text }}</h2>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

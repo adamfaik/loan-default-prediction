@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import os
+import joblib
 
 def load_data(path):
     """Loads data from a CSV file."""
@@ -35,7 +36,7 @@ def save_processed_data(output_path, **kwargs):
 
 def main():
     """Main function to run the data processing pipeline."""
-    input_data_path = 'data/Loan_Data.csv' # IMPORTANT: Use your actual CSV file name
+    input_data_path = 'data/Loan_Data.csv'
     output_data_path = 'data/processed'
     
     # 1. Load, 2. Create Features, 3. Split Features/Target
@@ -68,6 +69,13 @@ def main():
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
+    # --- ADD THIS SECTION TO SAVE THE SCALER ---
+    # Save the fitted scaler object for later use in the app
+    os.makedirs('processors', exist_ok=True)
+    joblib.dump(scaler, 'processors/scaler.joblib')
+    print("Scaler saved to processors/scaler.joblib")
+    # --- END OF ADDED SECTION ---
+
     # Convert scaled arrays back to DataFrames for saving
     X_train = pd.DataFrame(X_train_scaled, columns=X.columns)
     X_test = pd.DataFrame(X_test_scaled, columns=X.columns)

@@ -33,3 +33,7 @@ data/processed/
 
 # MLflow tracking artifacts
 mlruns/
+
+# Model and processor artifacts
+models/
+processors/
