@@ -3,6 +3,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 import os
 
 def load_data(path):
@@ -13,17 +14,9 @@ def load_data(path):
 def create_features(df):
     """Performs feature engineering."""
     print("Creating new features...")
-    
-    # Drop the customer_id as it's not a predictive feature
     df_processed = df.drop('customer_id', axis=1)
-    
-    # Create Debt-to-Income Ratio
-    # We add a small epsilon (1e-6) to income to avoid division by zero errors.
     df_processed['debt_to_income_ratio'] = df_processed['total_debt_outstanding'] / (df_processed['income'] + 1e-6)
-
-    # Create Loan-to-Income Ratio
     df_processed['loan_to_income_ratio'] = df_processed['loan_amt_outstanding'] / (df_processed['income'] + 1e-6)
-    
     print("Feature engineering complete.")
     return df_processed
 
@@ -42,30 +35,22 @@ def save_processed_data(output_path, **kwargs):
 
 def main():
     """Main function to run the data processing pipeline."""
-    # Define file paths
-    input_data_path = 'data/Loan_Data.csv'
+    input_data_path = 'data/Loan_Data.csv' # IMPORTANT: Use your actual CSV file name
     output_data_path = 'data/processed'
     
-    # 1. Load the raw data
+    # 1. Load, 2. Create Features, 3. Split Features/Target
     df = load_data(input_data_path)
-    
-    # 2. Perform initial, row-wise preprocessing (safe before splitting)
     df_featured = create_features(df.copy())
-    
-    # 3. Split data into features (X) and target (y)
     X = df_featured.drop('default', axis=1)
     y = df_featured['default']
     
-    # 4. Split data into training and testing sets
-    # We do this BEFORE any operations that learn from the data's distribution (like outlier bounds or scaling)
+    # 4. Split into training and testing sets
     print("Splitting data...")
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
-    print("Data splitting complete.")
     
-    # 5. Handle outliers AFTER splitting
-    # Learn the bounds from the training data, then apply them to both train and test sets.
+    # 5. Handle outliers (learning bounds from training data)
     print("Handling outliers...")
     columns_to_cap = ['income', 'fico_score', 'total_debt_outstanding', 'loan_amt_outstanding']
     for col in columns_to_cap:
@@ -74,17 +59,26 @@ def main():
         IQR = Q3 - Q1
         lower_bound = Q1 - 1.5 * IQR
         upper_bound = Q3 + 1.5 * IQR
-        
         X_train = cap_outliers(X_train.copy(), col, lower_bound, upper_bound)
         X_test = cap_outliers(X_test.copy(), col, lower_bound, upper_bound)
-    print("Outlier handling complete.")
+    
+    # 6. Scale features (learning scaling parameters from training data)
+    print("Scaling features...")
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    
+    # Convert scaled arrays back to DataFrames for saving
+    X_train = pd.DataFrame(X_train_scaled, columns=X.columns)
+    X_test = pd.DataFrame(X_test_scaled, columns=X.columns)
+    print("Feature scaling complete.")
 
-    # 6. Save the final processed data
+    # 7. Save the final processed data
     save_processed_data(
         output_data_path,
         X_train=X_train,
         X_test=X_test,
-        y_train=pd.DataFrame(y_train), # Saving series as DataFrame for consistency
+        y_train=pd.DataFrame(y_train),
         y_test=pd.DataFrame(y_test)
     )
 
