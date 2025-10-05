@@ -7,8 +7,8 @@
 
     env:
       # --- EDIT THESE TWO VARIABLES ---
-      AWS_REGION: eu-north-1               # Change this to your AWS region (e.g., us-east-1)
-      ECR_REPOSITORY: loan-default-app    # The name of your ECR repository
+      AWS_REGION: us-east-1
+      ECR_REPOSITORY: loan-default-app
       # --------------------------------
 
     jobs:
