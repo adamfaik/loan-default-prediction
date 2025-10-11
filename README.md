@@ -46,6 +46,7 @@ This project showcases several core MLOps practices:
 ├── Dockerfile              # Instructions to build the application's Docker image
 ├── requirements.txt        # Python dependencies
 └── README.md               # This file
+```
 
 ## How to Run This Project
 
