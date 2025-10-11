@@ -9,11 +9,12 @@ env:
   ECR_REPOSITORY: loan-default-app
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+  # =================================================================
+  # === JOB 1: Continuous Integration (CI) ===
+  # =================================================================
+  ci:
+    name: Build, Test, and Create Artifacts
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
     - name: Checkout repository
@@ -26,15 +27,49 @@ jobs:
 
     - name: Install Python dependencies
       run: pip install -r requirements.txt
+    
+    # In a real project, you would add linting and unit test steps here
+    # For now, we will generate the necessary deployment artifacts
 
-    - name: Run data processing script
+    - name: Run data processing script to generate scaler
       run: python src/data_processing.py
 
     - name: Run training script to generate model
       run: |
         mkdir -p models
         python src/train.py
+        # Find the best model from the mlruns directory and copy it
         cp $(find mlruns -name "model.pkl" | head -n 1) models/model.pkl
+        
+    - name: Upload artifacts for deployment job
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-artifacts
+        path: |
+          app.py
+          models/
+          processors/
+          templates/
+          requirements.txt
+          Dockerfile
+
+  # =================================================================
+  # === JOB 2: Continuous Deployment (CD) ===
+  # =================================================================
+  cd:
+    name: Deploy to AWS ECS
+    runs-on: ubuntu-latest
+    needs: ci # This is the key! This job will only run if the 'ci' job succeeds.
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download artifacts from CI job
+      uses: actions/download-artifact@v4
+      with:
+        name: app-artifacts
+        path: .
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -57,9 +92,6 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-    # =================================================================
-    # === NEW SECTION: Deploy to ECS ===
-    # =================================================================
     - name: Download existing task definition
       run: |
         aws ecs describe-task-definition --task-definition ${{ secrets.ECS_TASK_DEFINITION }} --query taskDefinition > task-definition.json
@@ -79,6 +111,3 @@ jobs:
         service: ${{ secrets.ECS_SERVICE }}
         cluster: ${{ secrets.ECS_CLUSTER }}
         wait-for-service-stability: true
-    # =================================================================
-    # === END OF NEW SECTION ===
-    # =================================================================
