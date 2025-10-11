@@ -26,28 +26,30 @@ This project showcases several core MLOps practices:
 
 ## Project Structure
 
-├── .github/workflows/      # Contains the GitHub Actions CI/CD pipeline (main.yml)
-├── data/
-│   ├── processed/          # Processed data (X_train, y_train, etc.) - Ignored by Git
-│   └── loan_deafult.csv    # The raw dataset
-├── docs/
-│   └── images/             # Screenshots for the final presentation
-├── models/                 # The final trained model artifact (model.pkl) - Ignored by Git
-├── notebooks/              # Jupyter notebooks for EDA and experimentation
-├── processors/             # The saved data scaler (scaler.joblib) - Ignored by Git
-├── src/
-│   ├── data_processing.py  # Script to clean data and create features
-│   └── train.py            # Script to train models and log with MLflow
-├── templates/
-│   └── index.html          # HTML template for the Flask app UI
-├── app.py                  # The Flask web application
-├── Dockerfile              # Instructions to build the application's Docker image
-├── requirements.txt        # Python dependencies
-└── README.md               # This file
+    ```
+    ├── .github/workflows/      # Contains the GitHub Actions CI/CD pipeline (main.yml)
+    ├── data/
+    │   ├── processed/          # Processed data (X_train, y_train, etc.) - Ignored by Git
+    │   └── loan_deafult.csv    # The raw dataset
+    ├── docs/
+    │   └── images/             # Screenshots for the final presentation
+    ├── models/                 # The final trained model artifact (model.pkl) - Ignored by Git
+    ├── notebooks/              # Jupyter notebooks for EDA and experimentation
+    ├── processors/             # The saved data scaler (scaler.joblib) - Ignored by Git
+    ├── src/
+    │   ├── data_processing.py  # Script to clean data and create features
+    │   └── train.py            # Script to train models and log with MLflow
+    ├── templates/
+    │   └── index.html          # HTML template for the Flask app UI
+    ├── app.py                  # The Flask web application
+    ├── Dockerfile              # Instructions to build the application's Docker image
+    ├── requirements.txt        # Python dependencies
+    └── README.md               # This file
+    ```
 
 ## How to Run This Project
 
-#### Prerequisites
+### Prerequisites
 
 - Python 3.9+
 
