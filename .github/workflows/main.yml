@@ -88,7 +88,17 @@ jobs:
 
     - name: Clean up the task definition file
       run: |
-        jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .enableDefaultInjection)' task-definition.json > clean-task-definition.json
+        jq 'del(
+          .taskDefinitionArn,
+          .revision,
+          .status,
+          .requiresAttributes,
+          .compatibilities,
+          .registeredAt,
+          .registeredBy,
+          .enableFaultInjection,
+          .deregisteredAt
+        )' task-definition.json > clean-task-definition.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
