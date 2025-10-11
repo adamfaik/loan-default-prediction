@@ -59,7 +59,7 @@ jobs:
   cd:
     name: Deploy to AWS ECS
     runs-on: ubuntu-latest
-    needs: ci # This is the key! This job will only run if the 'ci' job succeeds.
+    needs: ci # This job will only run if the 'ci' job succeeds.
 
     steps:
     - name: Checkout repository
@@ -96,11 +96,15 @@ jobs:
       run: |
         aws ecs describe-task-definition --task-definition ${{ secrets.ECS_TASK_DEFINITION }} --query taskDefinition > task-definition.json
 
+    - name: Clean up the task definition file
+      run: |
+        jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .enableDefaultInjection)' task-definition.json > clean-task-definition.json
+
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition.json
+        task-definition: clean-task-definition.json
         container-name: loan-default-app
         image: ${{ steps.build-image.outputs.image }}
 
