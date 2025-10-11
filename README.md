@@ -26,7 +26,7 @@ This project showcases several core MLOps practices:
 
 ## Project Structure
 
-    ```
+    ```bash
     ├── .github/workflows/      # Contains the GitHub Actions CI/CD pipeline (main.yml)
     ├── data/
     │   ├── processed/          # Processed data (X_train, y_train, etc.) - Ignored by Git
@@ -62,7 +62,7 @@ This project showcases several core MLOps practices:
 1.  **Clone the repository:**
 
     ```bash
-    git clone [https://github.com/adamfaik/loan-default-prediction](https://github.com/adamfaik/loan-default-prediction)
+    git clone https://github.com/adamfaik/loan-default-prediction
     cd loan-default-prediction
     ```
 
